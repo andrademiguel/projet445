@@ -5,6 +5,12 @@ const path = require("path");
 const multer = require("multer");
 const upload = multer();
 const { Pool } = require("pg");
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
 
 app.use(express.urlencoded({ extended: false }));
 app.set("view engine", "ejs");
@@ -23,12 +29,7 @@ app.use((req, res, next) => {
     next();
 });
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false
-    }
-});
+
 
 app.use(express.static("public"));
 
@@ -45,12 +46,12 @@ app.get("/", (req, res) => {
 app.get("/manage", async (req, res) => {
     const totRecs = await dblib.getTotalRecords();
     const customer = {
-        cusId: "",
-        cusFname: "",
-        cusLname: "",
-        cusState: "",
-        cusSalesYTD: "",
-        cusSalesPrev: ""
+        cusid: "",
+        cusfname: "",
+        cuslname: "",
+        cusstate: "",
+        cussalesytd: "",
+        cussalesprev: ""
     };
     res.render("manage", {
         type: "get",
@@ -86,24 +87,25 @@ app.post("/manage", async (req, res) => {
 app.get("/create", async (req, res) => {
     const totRecs = await dblib.getTotalRecords();
     const customer = {
-        cusId: "",
-        cusFname: "",
-        cusLname: "",
-        cusState: "",
-        cusSalesYTD: "",
-        cusSalesPrev: ""
+        cusid: "",
+        cusfname: "",
+        cuslname: "",
+        cusstate: "",
+        cussalesytd: "",
+        cussalesprev: ""
     };
     res.render("create", {
         type: "get",
         totRecs: totRecs.totRecords,
-        customer: customer
+        customer: customer,
+        model: customer
     });
 });
 
 //post create
 app.post("/create", (req, res) => {
-    const sql = "INSERT INTO customer (cusId, cusFname, cusLname, cusState, cusSalesYTD, cusSalesPrev) VALUES ($1, $2, $3, $4, $5, $6)";
-    const customer = [req.body.cusId, req.body.cusFname, req.body.cusLname, req.body.cusState, req.body.cusSalesYTD, req.body.cusSalesPrev];
+    const sql = "INSERT INTO customer (cusid, cusfname, cuslname, cusstate, cussalesytd, cussalesprev) VALUES ($1, $2, $3, $4, $5, $6)";
+    const customer = [req.body.cusid, req.body.cusfname, req.body.cuslname, req.body.cusstate, req.body.cussalesytd, req.body.cussalesprev];
     db.run(sql, customer, err => {
         if (err) {
             return console.error(err.message);
@@ -113,8 +115,74 @@ app.post("/create", (req, res) => {
 });
 
 
-//get delete
-//get post
+// GET /edit/5
+app.get("/edit/:id", (req, res) => {
+    const id = req.params.id;
+    const sql = "SELECT * FROM customer WHERE cusid = $1";
+    pool.query(sql, [id], (err, result) => {
+        // if (err) ...
+        res.render("edit", {
+            type: "get",
+            model: result.rows[0]
+        });
+    });
+});
+
+// POST /edit/5
+app.post("/edit/:id", (req, res) => {
+    const id = req.params.id;
+    const customer = [req.body.cusfname, req.body.cuslname, req.body.custate, req.body.cussalesytd, req.body.cussalesprev, id];
+    const sql = "UPDATE customer SET cusfname = $1, cuslname = $2, custate = $3, cussalesytd = $4, cussalesprev = $5, WHERE (cusid = $6)";
+    pool.query(sql, customer, (err, result) => {
+        if (err) {
+            return console.error(err.message);
+        }
+        res.redirect("/manage");
+    });
+});
+
+
+// GET /delete/5
+app.get("/delete/:id", (req, res) => {
+    const id = req.params.id;
+    const sql = "SELECT * FROM customer WHERE cusid = $1";
+    pool.query(sql, [id], (err, result) => {
+        if (err) {
+            return console.error(err, message);
+        }
+        // console.log(result.row[0]);
+        res.render("delete", {
+            model: result.rows[0],
+            type: "get"
+        });
+    });
+});
+
+// POST /delete/5
+app.post("/delete/:id", async (req, res) => {
+    const id = req.params.id;
+    const model = req.body;
+    const sql = "DELETE FROM customer WHERE cusid = $1";
+    try {
+        const remove = await pool.query(sql,[id]);
+        res.render("delete", {
+            model:model, 
+            remove: remove.rowCount,
+            type: "POST" 
+        }); 
+
+    } catch (err) {
+            res.render("delete", {
+                model:model,
+                remove: err.message,
+                type: "POST" });
+                console.log(err.message);
+        }
+        console.log("This is a test", remove);
+  });
+
+
+
 
 //get report
 
@@ -127,12 +195,12 @@ app.post("/create", (req, res) => {
 app.get("/import", async (req, res) => {
     const totRecs = await dblib.getTotalRecords();
     const customer = {
-        cusId: "",
-        cusFname: "",
-        cusLname: "",
-        cusState: "",
-        cusSalesYTD: "",
-        cusSalesPrev: ""
+        cusid: "",
+        cusfname: "",
+        cuslname: "",
+        cusstate: "",
+        cussalesytd: "",
+        cussalesprev: ""
     };
     res.render("import", {
         type: "get",
@@ -151,7 +219,7 @@ app.post("/import", upload.single('filename'), (req, res) => {
 
     lines.forEach(line => {
         customer = line.split(",");
-        const sql = "INSERT INTO CUSTOMER(cusId, cusFname, cusLname, cusState, cusSalesYTD, cusSalesPrev ) VALUES ($1, $2, $3, $4, $5, $6)";
+        const sql = "INSERT INTO CUSTOMER(cusid, cusfname, cuslname, cusstate, cussalesytd, cussalesprev ) VALUES ($1, $2, $3, $4, $5, $6)";
         pool.query(sql, customer, (err, result) => {
             if (err) {
                 console.log(`Insert Error.  Error message: ${err.message}`);
@@ -169,12 +237,12 @@ app.get("/export", async (req, res) => {
     var message = "";
     const totRecs = await dblib.getTotalRecords();
     const customer = {
-        cusId: "",
-        cusFname: "",
-        cusLname: "",
-        cusState: "",
-        cusSalesYTD: "",
-        cusSalesPrev: ""
+        cusid: "",
+        cusfname: "",
+        cuslname: "",
+        cusstate: "",
+        cussalesytd: "",
+        cussalesprev: ""
     };
     res.render("export", {
         message: message,
@@ -186,7 +254,7 @@ app.get("/export", async (req, res) => {
 
 // post export   
 app.post("/export", (req, res) => {
-    const sql = "SELECT * FROM customer ORDER BY cusId";
+    const sql = "SELECT * FROM customer ORDER BY cusid";
     pool.query(sql, [], (err, result) => {
         var message = "";
         if (err) {
@@ -195,10 +263,10 @@ app.post("/export", (req, res) => {
         } else {
             var output = "";
             result.rows.forEach(customer => {
-                output += `${customer.cusId},${customer.cusFname},${customer.cusLname},${customer.cusState},${customer.cusSalesYTD},${customer.cusSalesPrev},\r\n`;
+                output += `${customer.cusid},${customer.cusfname},${customer.cuslname},${customer.cusstate},${customer.cussalesytd},${customer.cussalesprev},\r\n`;
             });
             res.header("Content-Type", "text/csv");
-            res.attachment("export.csv");
+            res.attachment("export.txt");
             return res.send(output);
         };
     });

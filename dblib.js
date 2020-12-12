@@ -29,7 +29,7 @@ const insertCustomer = (customer) => {
     } else {
         params = Object.values(customer);
     };
-    const sql = `INSERT INTO customer (cusId, cusFname, cusLname, cusState, cusSalesYTD, cusSalesPrev)
+    const sql = `INSERT INTO customer (cusid, cusfname, cuslname, cusstate, cussalesytd, cussalesprev)
                  VALUES ($1, $2, $3, $4, $5, $6)`;
     return pool.query(sql, params)
         .then(res => {
@@ -53,38 +53,38 @@ const findCustomer = (customer) => {
     sql = "SELECT * FROM customer WHERE true";
 
     // Check data provided and build query as necessary
-    if (customer.cusId !== "") {
-        params.push(parseInt(customer.cusId));
-        sql += ` AND cusId = $${i}`;
+    if (customer.cusid !== "") {
+        params.push(parseInt(customer.cusid));
+        sql += ` AND cusid = $${i}`;
         i++;
     };
-    if (customer.cusFname !== "") {
-        params.push(`${customer.cusFname}%`);
-        sql += ` AND UPPER(cusFname) LIKE UPPER($${i})`;
+    if (customer.cusfname !== "") {
+        params.push(`${customer.cusfname}%`);
+        sql += ` AND UPPER(cusfname) LIKE UPPER($${i})`;
         i++;
     };
-    if (customer.cusLname !== "") {
-        params.push(`${customer.cusLname}%`);
-        sql += ` AND UPPER(cusLname) LIKE UPPER($${i})`;
+    if (customer.cuslname !== "") {
+        params.push(`${customer.cuslname}%`);
+        sql += ` AND UPPER(cuslname) LIKE UPPER($${i})`;
         i++;
     };
-    if (customer.cusState !== "") {
-        params.push(`${customer.cusState}%`);
-        sql += ` AND UPPER(cusState) LIKE UPPER($${i})`;
+    if (customer.cusstate !== "") {
+        params.push(`${customer.cusstate}%`);
+        sql += ` AND UPPER(cusstate) LIKE UPPER($${i})`;
         i++;
     };
-    if (customer.cusSalesYTD !== "") {
-        params.push(parseFloat(customer.cusSalesYTD));
-        sql += ` AND cusSalesYTD >= $${i}`;
+    if (customer.cussalesytd !== "") {
+        params.push(parseFloat(customer.cussalesytd));
+        sql += ` AND cussalesytd >= $${i}`;
         i++;
     };
-    if (customer.cusSalesPrev !== "") {
-        params.push(parseFloat(customer.cusSalesPrev));
-        sql += ` AND cusSalesPrev >= $${i}`;
+    if (customer.cussalesprev !== "") {
+        params.push(parseFloat(customer.cussalesprev));
+        sql += ` AND cussalesprev >= $${i}`;
         i++;
     };
 
-    sql += ` ORDER BY cusId`;
+    sql += ` ORDER BY cusid`;
     console.log("sql: " + sql);
     console.log("params: " + params);
 
