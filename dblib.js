@@ -24,16 +24,13 @@ const getTotalRecords = () => {
 };
 
 const insertCustomer = (customer) => {
-
     if (customer instanceof Array) {
         params = customer;
     } else {
         params = Object.values(customer);
     };
-
-    const sql = `INSERT INTO car (cusId, cusFname, cusLname, cusState, cusSalesYTD, cusSalesPrev)
+    const sql = `INSERT INTO customer (cusId, cusFname, cusLname, cusState, cusSalesYTD, cusSalesPrev)
                  VALUES ($1, $2, $3, $4, $5, $6)`;
-
     return pool.query(sql, params)
         .then(res => {
             return {
@@ -58,7 +55,7 @@ const findCustomer = (customer) => {
     // Check data provided and build query as necessary
     if (customer.cusId !== "") {
         params.push(parseInt(customer.cusId));
-        sql += ` AND carvin = $${i}`;
+        sql += ` AND cusId = $${i}`;
         i++;
     };
     if (customer.cusFname !== "") {
@@ -105,7 +102,6 @@ const findCustomer = (customer) => {
             }
         });
 };
-
 module.exports.findCustomer = findCustomer;
 module.exports.insertCustomer = insertCustomer;
 module.exports.getTotalRecords = getTotalRecords;
