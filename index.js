@@ -103,10 +103,10 @@ app.get("/create", async (req, res) => {
 });
 
 //post create
-app.post("/create", (req, res) => {
+app.post("/create", async (req, res) => {
     const sql = "INSERT INTO customer (cusid, cusfname, cuslname, cusstate, cussalesytd, cussalesprev) VALUES ($1, $2, $3, $4, $5, $6)";
     const customer = [req.body.cusid, req.body.cusfname, req.body.cuslname, req.body.cusstate, req.body.cussalesytd, req.body.cussalesprev];
-    db.run(sql, customer, err => {
+    pool.query(sql, customer, err => {
         if (err) {
             return console.error(err.message);
         }
