@@ -129,10 +129,10 @@ app.get("/edit/:id", (req, res) => {
 });
 
 // POST /edit/5
-app.post("/edit/:id", (req, res) => {
+app.post("/edit/:id", async (req, res) => {
     const id = req.params.id;
-    const customer = [req.body.cusfname, req.body.cuslname, req.body.custate, req.body.cussalesytd, req.body.cussalesprev, id];
-    const sql = "UPDATE customer SET cusfname = $1, cuslname = $2, custate = $3, cussalesytd = $4, cussalesprev = $5, WHERE (cusid = $6)";
+    const customer = [req.body.cusfname, req.body.cuslname, req.body.cusstate, req.body.cussalesytd, req.body.cussalesprev, id];
+    const sql = "UPDATE customer SET cusfname = $1, cuslname = $2, cusstate = $3, cussalesytd = $4, cussalesprev = $5 WHERE (cusid = $6)";
     pool.query(sql, customer, (err, result) => {
         if (err) {
             return console.error(err.message);
