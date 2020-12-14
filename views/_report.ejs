@@ -1,0 +1,62 @@
+<body>
+   <br>
+   <h1>Reports</h1>
+
+   <h4>Select Report</h4>
+   <form form action="/reports" method="POST">
+      <p>
+         <select class="browser-default custom-select">
+            
+            <option value="1">All Customers - Sorted by Customer Last Name, First Name</option>
+            <option value="2">All Customer - Sorted by Current Total Sales Decreasing</option>
+            <option value="3">Three Random Customers - Promotional Giveaway (Not Repeating)</option>
+         </select>
+      </p>
+
+      <input type="button" class="btn btn-primary " onclick="display()" value="Run Report">
+      <td span="2">
+         <!-- <input type="submit" value="Run Report" class="btn btn-primary" /> -->
+     </td>
+   </form>
+
+   <!-- Omitted Error Checking / Needs to be added -->
+<% if (type === "post") { %>
+   <% if (result.result.length === 0) { %>
+       <h3>No records found! </h3>
+       <% } else { %>
+           <h4>Number of Records Found: <%= totRecs %>
+           </h4>
+           <table class="table table-hover">
+               <thead>
+                   <tr>
+                       <th>ID</th>
+                       <th>First Name</th>
+                       <th>Last name</th>
+                       <th>State</th>
+                       <th>Sales YTD</th>
+                       <th>Prev Years Sales</th>
+                   </tr>
+               </thead>
+               <tbody>
+                   <% result.result.forEach(customer => { %>
+                   <tr>
+                       <td><%= customer.cusid %></td>
+                       <td><%= customer.cusfname %></td>
+                       <td><%= customer.cuslname %></td>
+                       <td><%= customer.cusstate %></td>
+                       <td><%= customer.cussalesytd %></td>
+                       <td><%= customer.cussalesprev %></td>
+                       </td>
+                   </tr>
+                   <% }); %>
+               </tbody>    
+           </table>
+       <% } %>
+<% } %>
+   <!-- <script>
+      function display() {
+         var obj = document.getElementById("selectNow");
+         document.write(obj.options[obj.selectedIndex].text);
+      }
+   </script>
+</body> -->

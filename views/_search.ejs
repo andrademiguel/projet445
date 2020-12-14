@@ -6,8 +6,9 @@
     <form action="/manage" method="POST">
         <table>
             <tr>
-                <td><label class="col-form-label col-sm-2" for="cusid">ID</label>:</td>
-                <td> <input type="number" name="cusid" id="cusid" value="<%= customer.cusid %>"   class="form-control" required /></td>
+                <td><label  for="cusid">ID</label>:</td>
+                <div >
+                <td> <input  type="number" name="cusid" id="cusid" value="<%= customer.cusid %>"   class="form-control" required /></td>
                 <td>(equals)</td>
             </tr>
             <tr>
@@ -49,6 +50,8 @@
     <% if (result.result.length === 0) { %>
         <h3>No records found! </h3>
         <% } else { %>
+            <h4>Number of Records Found: <%= totRecs %>
+            </h4>
             <table class="table table-hover">
                 <thead>
                     <tr>
