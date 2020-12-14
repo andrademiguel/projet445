@@ -141,7 +141,6 @@ app.post("/edit/:id", async (req, res) => {
     });
 });
 
-
 // GET /delete/5
 app.get("/delete/:id", (req, res) => {
     const id = req.params.id;
@@ -185,9 +184,44 @@ app.post("/delete/:id", async (req, res) => {
 
 
 //get report
+app.get("/reports", async (req, res) => {
+    const totRecs = await dblib.getTotalRecords();
+    const customer = {
+        cusid: "",
+        cusfname: "",
+        cuslname: "",
+        cusstate: "",
+        cussalesytd: "",
+        cussalesprev: ""
+    };
+    res.render("reports", {
+        type: "get",
+        totRecs: totRecs.totRecords,
+        customer: customer
+    });
+});
 
 //post report
-
+app.post("/reports", async (req, res) => {
+    const totRecs = await dblib.getTotalRecords();
+    dblib.findCustomer(req.body)
+        .then(result => {
+            res.render("reports", {
+                type: "post",
+                totRecs: totRecs.totRecords,
+                result: result,
+                customer: req.body
+            })
+        })
+        .catch(err => {
+            res.render("reports", {
+                type: "post",
+                totRecs: totRecs.totRecords,
+                result: `Unexpected Error: ${err.message}`,
+                customer: req.body
+            });
+        });
+});
 
 
 
