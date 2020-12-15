@@ -115,7 +115,7 @@ app.post("/create", async (req, res) => {
 });
 
 
-// GET /edit/5
+// GET edit
 app.get("/edit/:id", (req, res) => {
     const id = req.params.id;
     const sql = "SELECT * FROM customer WHERE cusid = $1";
@@ -128,7 +128,7 @@ app.get("/edit/:id", (req, res) => {
     });
 });
 
-// POST /edit/5
+// POST edit
 app.post("/edit/:id", async (req, res) => {
     const id = req.params.id;
     const customer = [req.body.cusfname, req.body.cuslname, req.body.cusstate, req.body.cussalesytd, req.body.cussalesprev, id];
@@ -141,7 +141,7 @@ app.post("/edit/:id", async (req, res) => {
     });
 });
 
-// GET /delete/5
+// GET delete
 app.get("/delete/:id", (req, res) => {
     const id = req.params.id;
     const sql = "SELECT * FROM customer WHERE cusid = $1";
@@ -157,73 +157,29 @@ app.get("/delete/:id", (req, res) => {
     });
 });
 
-// POST /delete/5
+// POST delete
 app.post("/delete/:id", async (req, res) => {
     const id = req.params.id;
     const model = req.body;
     const sql = "DELETE FROM customer WHERE cusid = $1";
     try {
-        const remove = await pool.query(sql,[id]);
+        const remove = await pool.query(sql, [id]);
         res.render("delete", {
-            model:model, 
+            model: model,
             remove: remove.rowCount,
-            type: "POST" 
-        }); 
+            type: "POST"
+        });
 
     } catch (err) {
-            res.render("delete", {
-                model:model,
-                remove: err.message,
-                type: "POST" });
-                console.log(err.message);
-        }
-        console.log("This is a test", remove);
-  });
-
-
-
-
-//get report
-app.get("/reports", async (req, res) => {
-    const totRecs = await dblib.getTotalRecords();
-    const customer = {
-        cusid: "",
-        cusfname: "",
-        cuslname: "",
-        cusstate: "",
-        cussalesytd: "",
-        cussalesprev: ""
-    };
-    res.render("reports", {
-        type: "get",
-        totRecs: totRecs.totRecords,
-        customer: customer
-    });
-});
-
-//post report
-app.post("/reports", async (req, res) => {
-    const totRecs = await dblib.getTotalRecords();
-    dblib.findCustomer(req.body)
-        .then(result => {
-            res.render("reports", {
-                type: "post",
-                totRecs: totRecs.totRecords,
-                result: result,
-                customer: req.body
-            })
-        })
-        .catch(err => {
-            res.render("reports", {
-                type: "post",
-                totRecs: totRecs.totRecords,
-                result: `Unexpected Error: ${err.message}`,
-                customer: req.body
-            });
+        res.render("delete", {
+            model: model,
+            remove: err.message,
+            type: "POST"
         });
+        console.log(err.message);
+    }
+    console.log("This is a test", remove);
 });
-
-
 
 //get import
 app.get("/import", async (req, res) => {
@@ -304,4 +260,73 @@ app.post("/export", (req, res) => {
             return res.send(output);
         };
     });
+});
+
+//get report
+app.get("/reports", async (req, res) => {
+    const reports = req.body.value;
+    res.render("reports", {
+        type: "get",
+        model: reports,
+        obc: "",
+        obs: "",
+        obr: ""
+    });
+});
+
+//post report
+app.post("/reports", async (req, res) => {
+    var report;
+    var trans;
+    var c;
+    var s;
+    var r;
+const model = req.body;
+    try {
+        if (req.body.reports === "1") {
+            const custSort = await dblib.scust();
+            report = custSort.obl
+            trans = custSort.trans;
+            c = "selected";
+
+        }
+        else if (req.body.reports === "2") {
+            const salSort = await dblib.ssales();
+            if (salSort.trans === "success") {
+                report = salSort.obs;
+                trans = salSort.trans;
+                s = "selected";
+            }
+            else {
+                report = salSort.msg;
+                trans = salSort.trans;
+                r = "selected"
+            }
+        }
+        else {
+            const ranCus = await dblib.random();
+            report = ranCus.obr;
+            trans = ranCus.trans;
+            r = "selected"
+        }
+        res.render("reports", {
+            type: "post",
+            report: report,
+            trans: trans,
+            model: model,
+            value: req.body.reports,
+            obc: c,
+            obs: s,
+            obr: r
+        });
+    } catch (err) {
+        res.render("reports", {
+            type: "post",
+            trans: "fail",
+            report: err.message,
+            model: model,
+            value: req.body.reports
+
+        });
+    }
 });

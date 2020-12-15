@@ -46,6 +46,57 @@ const insertCustomer = (customer) => {
         });
 };
 
+const scust = () => {
+    const sql = "SELECT * FROM customer ORDER BY cuslname asc";
+    return pool.query(sql) 
+    .then(report => {
+        return {
+            trans:"success",
+            obl: report.rows
+        }
+    })
+    .catch(err => {
+        return{
+            trans: "fail",
+            msg: `${err.message}`
+        }
+    });
+};
+
+const ssales = () => {
+    const sql = "SELECT * FROM customer ORDER BY cussalesytd desc";
+    return pool.query(sql)
+    .then(report => {
+        return {
+            trans: "success",
+            obs: report.rows
+        }
+    })
+    .catch(err => {
+        return{
+            trans: "fail",
+            msg: `${err.message}`
+        }
+    });
+};
+
+const random = () => {
+    const sql = "SELECT * FROM customer ORDER BY RANDOM() LIMIT 3";
+    return pool.query (sql)
+    .then(report => {
+        return {
+            trans: "success",
+            obr: report.rows
+        }
+    })
+    .catch(err => {
+        return{
+            trans: "fail",
+            msg: `${err.message}`
+        }
+    });
+};
+
 const findCustomer = (customer) => {
 
     var i = 1;
@@ -102,6 +153,12 @@ const findCustomer = (customer) => {
             }
         });
 };
+
 module.exports.findCustomer = findCustomer;
 module.exports.insertCustomer = insertCustomer;
 module.exports.getTotalRecords = getTotalRecords;
+module.exports.scust = scust;
+module.exports.ssales = ssales;
+module.exports.random = random;
+
+
